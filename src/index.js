@@ -1,0 +1,13 @@
+require('codemirror/lib/codemirror.css');
+require('codemirror/addon/dialog/dialog.css')
+require('codemirror/addon/display/fullscreen.css')
+require('codemirror/lib/codemirror.js')
+require('codemirror/addon/edit/closetag.js')
+require('codemirror/addon/edit/closebrackets.js')
+require('codemirror/addon/edit/continuelist.js')
+require('codemirror/addon/search/match-highlighter.js')
+require('codemirror/addon/search/jump-to-line.js')
+require('codemirror/addon/search/search.js')
+require('codemirror/addon/search/searchcursor.js')
+require('codemirror/addon/dialog/dialog.js')
+require('codemirror/addon/display/fullscreen.js')
