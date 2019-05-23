@@ -3,9 +3,6 @@ Name:   Acrylic-Markdown-Light
 Author: Richasy
 */
 
-.cm-s-acrmd-light {
-    font-family: 'Microsoft JhengHei';
-}
 .cm-s-acrmd-light .CodeMirror-selected {
     background: #d9d9d9;
 }
@@ -44,14 +41,14 @@ Author: Richasy
 .cm-s-acrmd-light span.cm-hr {
     color: #909292 !important;
 }
-.cm-s-acrmd-light span.cm-number{color: #909292; font-style:italic;}
+.cm-s-acrmd-light span.cm-number{color: #4CC3D2; font-style:italic;}
     .cm-s-acrmd-light span.cm-link {
         color: #FF8B6F;
         font-weight: 600;
         text-decoration: none;
     }
     .cm-s-acrmd-light span.cm-image.cm-link {
-        color: #8E96AA;
+        color: #7C4DFF;
         font-weight: 600;
         text-decoration: none;
     }
@@ -94,7 +91,7 @@ Author: Richasy
     .cm-s-acrmd-light span.cm-def, .cm-s-acrmd-light span.cm-tag, .cm-s-acrmd-light span.cm-builtin, .cm-s-acrmd-light span.cm-qualifier {
         color: #1A2C79;
     }
-.cm-s-acrmd-light span.cm-bracket, .cm-s-acrmd-light span.cm-comment { color: rgb(156, 162, 173); }
+.cm-s-acrmd-light span.cm-bracket, .cm-s-acrmd-light span.cm-comment { color: #888888; }
 
 /*  */
 /* .cm-s-acrmd-light span.cm-error { background: #896724; color: #728fcb; } */

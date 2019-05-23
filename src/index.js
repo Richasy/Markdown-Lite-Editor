@@ -8,6 +8,7 @@ import 'codemirror/addon/display/fullscreen.css'
 //require('./lib/jquery.js');
 import * as CodeMirror from 'codemirror/lib/codemirror.js';
 import 'codemirror/addon/edit/closetag.js'
+import 'codemirror/addon/scroll/scrollpastend.js'
 import 'codemirror/addon/edit/closebrackets.js'
 import 'codemirror/addon/edit/continuelist.js'
 import 'codemirror/addon/search/match-highlighter.js'
@@ -28,77 +29,103 @@ window.EditInit = function(content, theme, fontSize,fontFamily) {
         document.body.classList.remove('dark');
         document.body.classList.add('light');
     }
+    window.isCursorFix=false;
+    window.fixCursor={};
     window.isInput = true;
     window.inputInterval = 0;
-    window.editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
-        mode: 'markdown',
-        autoCloseTags:true,
-        autoCloseBrackets: true,
-        theme: theme,
-        lineNumbers:true,
-        lineWrapping: true,
-        scrollbarStyle: 'null',
-        maxHighlightLength: Infinity,
-        inputStyle: 'contenteditable',
-        fullScreen:true,
-        extraKeys: {
-            "Ctrl-B": (cm) => { TextEffect(cm, 'b') },
-            "Ctrl-C": (cm) => { cm.execCommand('copy') },
-            "Ctrl-X": (cm) => { cm.execCommand('cut') },
-            "Ctrl-I": (cm) => { TextEffect(cm, 'i') },
-            "Ctrl-Q": (cm) => { TextEffect(cm, 'q') },
-            "Ctrl-D": (cm) => { TextEffect(cm, 'd') },
-            "Ctrl-P": (cm) => { TextEffect(cm, 'p') },
-            "Ctrl-T": (cm) => { TextEffect(cm, 't') },
-            "Ctrl-R": (cm) => { TextEffect(cm, 'r') },
-            "Ctrl-U": (cm) => { TextEffect(cm, 'u') },
-            "Ctrl-F":(cm)=>{cm.execCommand('find')},
-            "Ctrl-H":(cm)=>{cm.execCommand('replace')},
-            "Shift-F1": (cm) => { TextEffect(cm, 'sup') },
-            "Shift-F2": (cm) => { TextEffect(cm, 'sub') },
-            "Shift-F3": (cm) => { UpperandLower(cm) },
-            "Ctrl-Z": (cm) => {
-                var his = cm.doc.historySize();
-                if (his.undo > 1) {
-                    cm.doc.undo();
-                }
-            },
-            "Enter": "newlineAndIndentContinueMarkdownList"
-        }
-    });
-    SetText(content);
-    SetFontSize(fontSize);
-    document.getElementsByClassName('CodeMirror')[0].style.fontFamily=fontFamily;
-    editor.on('change', () => {
-        window.isInput = true;
-    });
-    editor.on('scroll', (cm) => {
-        var data = cm.getScrollInfo();
-        var top = data.top;
-        var height = data.height;
-        var obj = {
-            Name: 'ScrollChanged',
-            Value: top / height
-        };
-        var result = JSON.stringify(obj);
-        window.external.notify(result);
-    });
-    setInterval(() => {
-        window.inputInterval += 200;
-        if (window.inputInterval > 600) {
-            if (window.isInput) {
-                var text = GetText();
-                var obj1 = {
-                    Name: 'TextChange',
-                    Value: text
-                }
-                var result1 = JSON.stringify(obj1);
-                window.external.notify(result1);
-                window.isInput = false;
+    if(window.editor){
+        window.editor.setValue(content);
+    }else{
+        window.editor = CodeMirror.fromTextArea(document.getElementById('mdEditor'), {
+            mode: 'markdown',
+            autoCloseTags:true,
+            autoCloseBrackets: true,
+            theme: theme,
+            lineNumbers:false,
+            scrollPastEnd:true,
+            lineWrapping: true,
+            scrollbarStyle: 'null',
+            maxHighlightLength: Infinity,
+            inputStyle: 'contenteditable',
+            fullScreen:true,
+            extraKeys: {
+                "Ctrl-B": (cm) => { TextEffect(cm, 'b') },
+                "Ctrl-C": (cm) => { 
+                    window.fixCursor = cm.getCursor();
+                    window.isCursorFix=true;
+                    document.execCommand('copy');
+                },
+                "Ctrl-X": (cm) => {
+                    window.fixCursor = cm.getCursor();
+                    window.isCursorFix=true;
+                    document.execCommand('cut');
+                },
+                "Ctrl-I": (cm) => { TextEffect(cm, 'i') },
+                "Ctrl-Q": (cm) => { TextEffect(cm, 'q') },
+                "Ctrl-D": (cm) => { TextEffect(cm, 'd') },
+                "Ctrl-P": (cm) => { TextEffect(cm, 'p') },
+                "Ctrl-T": (cm) => { TextEffect(cm, 't') },
+                "Ctrl-R": (cm) => { TextEffect(cm, 'r') },
+                "Ctrl-U": (cm) => { TextEffect(cm, 'u') },
+                "Ctrl-F":(cm)=>{cm.execCommand('find')},
+                "Ctrl-H":(cm)=>{cm.execCommand('replace')},
+                "Shift-F1": (cm) => { TextEffect(cm, 'sup') },
+                "Shift-F2": (cm) => { TextEffect(cm, 'sub') },
+                "Shift-F3": (cm) => { UpperandLower(cm) },
+                "Ctrl-Z": (cm) => {
+                    var his = cm.doc.historySize();
+                    if (his.undo > 1) {
+                        cm.doc.undo();
+                    }
+                },
+                "Enter": "newlineAndIndentContinueMarkdownList"
             }
-            window.inputInterval = 0;
-        }
-    }, 200);
+        });
+        window.editor.setOption("fullScreen", true);
+        SetText(content);
+        SetFontSize(fontSize);
+        document.getElementsByClassName('CodeMirror')[0].style.fontFamily=fontFamily;
+        window.editor.on('change', () => {
+            window.isInput = true;
+        });
+        window.editor.on('cursorActivity',()=>{
+            if(window.isCursorFix){
+                window.editor.setCursor(window.fixCursor);
+                window.isCursorFix=false;
+            }
+        })
+        window.editor.on('scroll', (cm) => {
+            var data = cm.getScrollInfo();
+            var top = data.top;
+            var height = data.height-document.body.clientHeight;
+            var obj = {
+                Key: 'ScrollChanged',
+                Value: JSON.stringify({
+                    Key:top,
+                    Value:height
+                })
+            };
+            var result = JSON.stringify(obj);
+            window.external.notify(result);
+        });
+        setInterval(() => {
+            window.inputInterval += 200;
+            if (window.inputInterval > 600) {
+                if (window.isInput) {
+                    var text = GetText();
+                    var obj1 = {
+                        Key: 'TextChange',
+                        Value: text
+                    }
+                    var result1 = JSON.stringify(obj1);
+                    window.external.notify(result1);
+                    window.isInput = false;
+                }
+                window.inputInterval = 0;
+            }
+        }, 200);
+    }
+    
     // document.getElementById('QueryCloseButton').click(()=>{
     //     queryText="";
     //     document.getElementById("QueryInputBox").innerText='';
