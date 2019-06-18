@@ -30,6 +30,8 @@ window.EditInit = function (content, theme, fontSize, fontFamily) {
     document.body.classList.add('light');
   }
   defineMarkdown();
+  window.TextEffect=TextEffect;
+  window.InsertText=InsertText;
   window.isCursorFix = false;
   window.isCursorCutFix = false;
   window.fixCursor = {};
@@ -170,6 +172,18 @@ window.EditInit = function (content, theme, fontSize, fontFamily) {
   // })
 }
 
+function InsertText(text){
+  if(window.editor){
+    var doc=window.editor.getDoc();
+    let cursor=doc.getCursor();
+    let pos={
+      line: cursor.line,
+      ch:cursor.ch
+    };
+    doc.replaceRange(text,pos);
+  }
+}
+
 function SetText(text) {
   editor.setValue(text);
 }
@@ -266,6 +280,20 @@ function TextEffect(cm, eff) {
         }
         s = `${h} ${s}`;
         break;
+      case "ul":
+        let sp1 = s.split('\n');
+        for (let si of sp1) {
+          si = "- " + si;
+        }
+        s = sp1.join('\n');
+        break;
+      case "ol":
+        let sp2 = s.split('\n');
+        for (let i = 0; i < sp2.length; i++) {
+          let si = sp2[i];
+          si = i + " " + si;
+        }
+        s = sp2.join("\n");
     }
 
     cm.doc.replaceSelection(s);
