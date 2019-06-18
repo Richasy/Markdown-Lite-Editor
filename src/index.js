@@ -18,60 +18,86 @@ import 'codemirror/addon/search/searchcursor.js'
 import 'codemirror/addon/dialog/dialog.js'
 import 'codemirror/addon/display/fullscreen.js'
 
-window.EditInit = function(content, theme, fontSize,fontFamily) {
+window.EditInit = function (content, theme, fontSize, fontFamily) {
     if (theme === "Dark") {
         theme = 'acrmd-dark';
         document.body.classList.remove('light');
         document.body.classList.add('dark');
-    }
-    else {
+    } else {
         theme = 'acrmd-light';
         document.body.classList.remove('dark');
         document.body.classList.add('light');
     }
-    window.isCursorFix=false;
-    window.fixCursor={};
+    window.TextEffect = TextEffect;
+    window.isCursorFix = false;
+    window.fixCursor = {};
     window.isInput = true;
     window.inputInterval = 0;
-    if(window.editor){
+    if (window.editor) {
         window.editor.setValue(content);
-    }else{
+    } else {
         window.editor = CodeMirror.fromTextArea(document.getElementById('mdEditor'), {
             mode: 'markdown',
-            autoCloseTags:true,
+            autoCloseTags: true,
             autoCloseBrackets: true,
             theme: theme,
-            lineNumbers:false,
-            scrollPastEnd:true,
+            lineNumbers: false,
+            scrollPastEnd: true,
             lineWrapping: true,
             scrollbarStyle: 'null',
             maxHighlightLength: Infinity,
             inputStyle: 'contenteditable',
-            fullScreen:true,
+            fullScreen: true,
             extraKeys: {
-                "Ctrl-B": (cm) => { TextEffect(cm, 'b') },
-                "Ctrl-C": (cm) => { 
+                "Ctrl-B": (cm) => {
+                    TextEffect(cm, 'b')
+                },
+                "Ctrl-C": (cm) => {
                     window.fixCursor = cm.getCursor();
-                    window.isCursorFix=true;
+                    window.isCursorFix = true;
                     document.execCommand('copy');
                 },
                 "Ctrl-X": (cm) => {
                     window.fixCursor = cm.getCursor();
-                    window.isCursorFix=true;
+                    window.isCursorFix = true;
                     document.execCommand('cut');
                 },
-                "Ctrl-I": (cm) => { TextEffect(cm, 'i') },
-                "Ctrl-Q": (cm) => { TextEffect(cm, 'q') },
-                "Ctrl-D": (cm) => { TextEffect(cm, 'd') },
-                "Ctrl-P": (cm) => { TextEffect(cm, 'p') },
-                "Ctrl-T": (cm) => { TextEffect(cm, 't') },
-                "Ctrl-R": (cm) => { TextEffect(cm, 'r') },
-                "Ctrl-U": (cm) => { TextEffect(cm, 'u') },
-                "Ctrl-F":(cm)=>{cm.execCommand('find')},
-                "Ctrl-H":(cm)=>{cm.execCommand('replace')},
-                "Shift-F1": (cm) => { TextEffect(cm, 'sup') },
-                "Shift-F2": (cm) => { TextEffect(cm, 'sub') },
-                "Shift-F3": (cm) => { UpperandLower(cm) },
+                "Ctrl-I": (cm) => {
+                    TextEffect(cm, 'i')
+                },
+                "Ctrl-Q": (cm) => {
+                    TextEffect(cm, 'q')
+                },
+                "Ctrl-D": (cm) => {
+                    TextEffect(cm, 'd')
+                },
+                "Ctrl-P": (cm) => {
+                    TextEffect(cm, 'p')
+                },
+                "Ctrl-T": (cm) => {
+                    TextEffect(cm, 't')
+                },
+                "Ctrl-R": (cm) => {
+                    TextEffect(cm, 'r')
+                },
+                "Ctrl-U": (cm) => {
+                    TextEffect(cm, 'u')
+                },
+                "Ctrl-F": (cm) => {
+                    cm.execCommand('find')
+                },
+                "Ctrl-H": (cm) => {
+                    cm.execCommand('replace')
+                },
+                "Shift-F1": (cm) => {
+                    TextEffect(cm, 'sup')
+                },
+                "Shift-F2": (cm) => {
+                    TextEffect(cm, 'sub')
+                },
+                "Shift-F3": (cm) => {
+                    UpperandLower(cm)
+                },
                 "Ctrl-Z": (cm) => {
                     var his = cm.doc.historySize();
                     if (his.undo > 1) {
@@ -84,25 +110,25 @@ window.EditInit = function(content, theme, fontSize,fontFamily) {
         window.editor.setOption("fullScreen", true);
         SetText(content);
         SetFontSize(fontSize);
-        document.getElementsByClassName('CodeMirror')[0].style.fontFamily=fontFamily;
+        document.getElementsByClassName('CodeMirror')[0].style.fontFamily = fontFamily;
         window.editor.on('change', () => {
             window.isInput = true;
         });
-        window.editor.on('cursorActivity',()=>{
-            if(window.isCursorFix){
+        window.editor.on('cursorActivity', () => {
+            if (window.isCursorFix) {
                 window.editor.setCursor(window.fixCursor);
-                window.isCursorFix=false;
+                window.isCursorFix = false;
             }
         })
         window.editor.on('scroll', (cm) => {
             var data = cm.getScrollInfo();
             var top = data.top;
-            var height = data.height-document.body.clientHeight;
+            var height = data.height - document.body.clientHeight;
             var obj = {
                 Key: 'ScrollChanged',
                 Value: JSON.stringify({
-                    Key:top,
-                    Value:height
+                    Key: top,
+                    Value: height
                 })
             };
             var result = JSON.stringify(obj);
@@ -125,7 +151,7 @@ window.EditInit = function(content, theme, fontSize,fontFamily) {
             }
         }, 200);
     }
-    
+
     // document.getElementById('QueryCloseButton').click(()=>{
     //     queryText="";
     //     document.getElementById("QueryInputBox").innerText='';
@@ -139,103 +165,119 @@ window.EditInit = function(content, theme, fontSize,fontFamily) {
     //     console.log(queryCursor);
     // })
 }
+
 function SetText(text) {
     editor.setValue(text);
 }
-function ShowQuery(){
+
+function ShowQuery() {
     document.getElementsByClassName(".SearchDialog")[0].classList.remove('hide');
 }
+
 function SetFontSize(size) {
-    document.body.style.fontSize=size+"px";
+    document.body.style.fontSize = size + "px";
 }
+
 function SetColor(isDark) {
-    var ele=document.getElementsByClassName('CodeMirror')[0];
+    var ele = document.getElementsByClassName('CodeMirror')[0];
     if (isDark) {
         editor.options.theme = 'acrmd-dark';
         ele.classList.remove('cm-s-acrmd-light');
         ele.classList.add('cm-s-acrmd-dark');
-    }
-    else {
+    } else {
         editor.options.theme = 'acrmd-light';
         ele.classList.add('cm-s-acrmd-light');
         ele.classList.remove('cm-s-acrmd-dark');
     }
 }
+
 function UpperandLower(cm) {
     var s = cm.doc.getSelection('\n');
     if (s.length > 0) {
         var reg = /[a-z]/;
-            let b = true;
-            for (let i = 0; i < s.length; i++) {
-                if (reg.test(s[i])) {
-                    b = false;
-                }
+        let b = true;
+        for (let i = 0; i < s.length; i++) {
+            if (reg.test(s[i])) {
+                b = false;
             }
-            if (!b) {
-                s = s.toUpperCase();
-            }
-            else {
-                s = s.toLowerCase();
-            }
+        }
+        if (!b) {
+            s = s.toUpperCase();
+        } else {
+            s = s.toLowerCase();
+        }
         cm.doc.replaceSelection(s);
     }
 }
+
 function GetText() {
     let text = editor.doc.getValue('\n');
     return text;
 }
 
-function TextEffect(cm,eff) {
+function TextEffect(cm, eff) {
     var s = cm.doc.getSelection('\n');
     if (s.length > 0) {
-            switch (eff.toLowerCase()) {
-                case "b":
-                    s = `**${s}**`;
-                    break;
-                case "i":
-                    s = `*${s}*`;
-                    break;
-                case "q":
-                    s = `> ${s}`;
-                    break;
-                case "d":
-                    s = `\`${s}\``;
-                    break;
-                case "p":
-                    s = `\`\`\`\n${s}\n\`\`\``;
-                    break;
-                case "u":
-                    s = `_${s}_`;
-                    break;
-                case "t":
-                    s = `\n|${s}||\n|-|-|\n`;
-                    break;
-                case "sup":
-                    s = `^${s} `;
-                    break;
-                case "sub":
-                    s = `~${s}~`;
-                    break;
-                case "r":
-                    s = `~~${s}~~`;
-                    break;
-                case "number1":
-                case "number2":
-                case "number3":
-                case "number4":
-                case "number5":
-                case "number6":
-                    var num = parseInt(eff.replace("Number", ""));
-                    var h = "";
-                    for (let i = 0; i < num; i++)
-                    {
-                        h += "#";
-                    }
-                    s = `${h} ${s}`;
-                    break;
+        switch (eff.toLowerCase()) {
+            case "b":
+                s = `**${s}**`;
+                break;
+            case "i":
+                s = `*${s}*`;
+                break;
+            case "q":
+                s = `> ${s}`;
+                break;
+            case "d":
+                s = `\`${s}\``;
+                break;
+            case "p":
+                s = `\`\`\`\n${s}\n\`\`\``;
+                break;
+            case "u":
+                s = `_${s}_`;
+                break;
+            case "t":
+                s = `\n|${s}||\n|-|-|\n`;
+                break;
+            case "sup":
+                s = `^${s} `;
+                break;
+            case "sub":
+                s = `~${s}~`;
+                break;
+            case "r":
+                s = `~~${s}~~`;
+                break;
+            case "number1":
+            case "number2":
+            case "number3":
+            case "number4":
+            case "number5":
+            case "number6":
+                var num = parseInt(eff.replace("Number", ""));
+                var h = "";
+                for (let i = 0; i < num; i++) {
+                    h += "#";
+                }
+                s = `${h} ${s}`;
+                break;
+            case "ul":
+                let sp1 = s.split('\n');
+                for (let si of sp1) {
+                    si = "- " + si;
+                }
+                s = sp1.join('\n');
+                break;
+            case "ol":
+                let sp2 = s.split('\n');
+                for (let i = 0; i < sp2.length; i++) {
+                    let si = sp2[i];
+                    si = i + " " + si;
+                }
+                s = sp2.join("\n");
         }
-        
+
         cm.doc.replaceSelection(s);
     }
 }
-    
