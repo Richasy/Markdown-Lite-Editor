@@ -18,4 +18,5 @@ module.exports = {
             template: './src/index.html'   //  HTML模板路径
         })
     ],
+    watch: true
 };
