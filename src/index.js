@@ -282,18 +282,22 @@ function TextEffect(cm, eff) {
         break;
       case "ul":
         let sp1 = s.split('\n');
+        let temp_sp1=[];
         for (let si of sp1) {
-          si = "- " + si;
+          let yo = "- " + si;
+          temp_sp1.push(yo);
         }
-        s = sp1.join('\n');
+        s = temp_sp1.join('\n');
         break;
       case "ol":
         let sp2 = s.split('\n');
+        let temp_sp2=[];
         for (let i = 0; i < sp2.length; i++) {
           let si = sp2[i];
-          si = i + " " + si;
+          let yo = (i+1) + ". " + si;
+          temp_sp2.push(yo);
         }
-        s = sp2.join("\n");
+        s = temp_sp2.join("\n");
     }
 
     cm.doc.replaceSelection(s);
